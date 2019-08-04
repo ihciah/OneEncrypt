@@ -150,13 +150,81 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Encryptor.cpp" />
     <ClCompile Include="FileHook.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Encryptor.h" />
     <ClInclude Include="FileHook.h" />
+    <ClInclude Include="libsodium\include\sodium.h" />
+    <ClInclude Include="libsodium\include\sodium\core.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_aead_aes256gcm.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_aead_chacha20poly1305.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_aead_xchacha20poly1305.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_auth.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_auth_hmacsha256.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_auth_hmacsha512.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_auth_hmacsha512256.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_box.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_box_curve25519xchacha20poly1305.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_box_curve25519xsalsa20poly1305.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_core_ed25519.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_core_hchacha20.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_core_hsalsa20.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_core_ristretto255.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_core_salsa20.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_core_salsa2012.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_core_salsa208.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_generichash.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_generichash_blake2b.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_hash.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_hash_sha256.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_hash_sha512.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_kdf.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_kdf_blake2b.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_kx.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_onetimeauth.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_onetimeauth_poly1305.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_pwhash.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_pwhash_argon2i.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_pwhash_argon2id.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_pwhash_scryptsalsa208sha256.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_scalarmult.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_scalarmult_curve25519.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_scalarmult_ed25519.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_scalarmult_ristretto255.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_secretbox.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_secretbox_xchacha20poly1305.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_secretbox_xsalsa20poly1305.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_secretstream_xchacha20poly1305.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_shorthash.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_shorthash_siphash24.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_sign.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_sign_ed25519.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_sign_edwards25519sha512batch.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_stream.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_stream_chacha20.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_stream_salsa20.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_stream_salsa2012.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_stream_salsa208.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_stream_xchacha20.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_stream_xsalsa20.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_verify_16.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_verify_32.h" />
+    <ClInclude Include="libsodium\include\sodium\crypto_verify_64.h" />
+    <ClInclude Include="libsodium\include\sodium\export.h" />
+    <ClInclude Include="libsodium\include\sodium\randombytes.h" />
+    <ClInclude Include="libsodium\include\sodium\randombytes_internal_random.h" />
+    <ClInclude Include="libsodium\include\sodium\randombytes_sysrandom.h" />
+    <ClInclude Include="libsodium\include\sodium\runtime.h" />
+    <ClInclude Include="libsodium\include\sodium\utils.h" />
+    <ClInclude Include="libsodium\include\sodium\version.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="libsodium\lib\x64\libsodium.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

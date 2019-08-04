@@ -2,6 +2,10 @@
 #include <Windows.h>
 #include <detours.h>
 #include <detver.h>
+#include <unordered_map>
+#include <functional>
+#include <utility>
+#include "Encryptor.h"
 
 template<typename T>
 void HookFunction(T &fn_real, _In_ PVOID fn_mine)
@@ -18,16 +22,30 @@ void UnhookFunction(T &fn_real, _In_ PVOID fn_mine)
 typedef BOOL(WINAPI *READFILE) (HANDLE, LPVOID, DWORD, LPDWORD, LPOVERLAPPED);
 typedef BOOL(WINAPI *READFILEEX)(HANDLE, LPVOID, DWORD, LPOVERLAPPED, LPOVERLAPPED_COMPLETION_ROUTINE);
 typedef BOOL(WINAPI *READFILESCATTER)(HANDLE, FILE_SEGMENT_ELEMENT[], DWORD, LPDWORD, LPOVERLAPPED);
+typedef BOOL(WINAPI *WRITEFILE)(HANDLE, LPCVOID, DWORD, LPDWORD, LPOVERLAPPED);
+typedef HANDLE(WINAPI *CREATEFILEW)(LPCWSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE);
+typedef BOOL(WINAPI *CLOSEHANDLE)(HANDLE);
 
 class FileHook {
+private:
+	std::unordered_map<HANDLE, Encryptor> encryptorMap;
+	std::allocator<unsigned char> allocator;
+	unsigned char masterKey[crypto_stream_xchacha20_KEYBYTES];
+
 public:
-	READFILE realReadFile = NULL;
-	READFILEEX realReadFileEx = NULL;
-	READFILESCATTER realReadFileScatter = NULL;
+	READFILE realReadFile = nullptr;
+	READFILEEX realReadFileEx = nullptr;
+	READFILESCATTER realReadFileScatter = nullptr;
+	WRITEFILE realWriteFile = nullptr;
+	CREATEFILEW realCreateFileW = nullptr;
+	CLOSEHANDLE realCloseHandle = nullptr;
 
 	void hookReadFile();
 	void unhookReadFile();
 	BOOL WINAPI FakeReadFile(HANDLE, LPVOID, DWORD, LPDWORD, LPOVERLAPPED);
 	BOOL WINAPI FakeReadFileEx(HANDLE, LPVOID, DWORD, LPOVERLAPPED, LPOVERLAPPED_COMPLETION_ROUTINE);
 	BOOL WINAPI FakeReadFileScatter(HANDLE, FILE_SEGMENT_ELEMENT[], DWORD, LPDWORD, LPOVERLAPPED);
+	BOOL WINAPI FakeWriteFile(HANDLE, LPCVOID, DWORD, LPDWORD, LPOVERLAPPED);
+	HANDLE WINAPI FakeCreateFileW(LPCWSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE);
+	BOOL WINAPI FakeCloseHandle(HANDLE);
 };

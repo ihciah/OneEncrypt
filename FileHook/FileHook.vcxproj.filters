@@ -13,12 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Libraries">
+      <UniqueIdentifier>{cb6d3d07-074b-4edb-aa66-2ce02170ece6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileHook.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Encryptor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,5 +35,202 @@
     <ClInclude Include="FileHook.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\core.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_aead_aes256gcm.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_aead_chacha20poly1305.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_aead_xchacha20poly1305.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_auth.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_auth_hmacsha256.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_auth_hmacsha512.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_auth_hmacsha512256.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_box.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_box_curve25519xchacha20poly1305.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_box_curve25519xsalsa20poly1305.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_core_ed25519.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_core_hchacha20.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_core_hsalsa20.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_core_ristretto255.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_core_salsa20.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_core_salsa2012.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_core_salsa208.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_generichash.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_generichash_blake2b.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_hash.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_hash_sha256.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_hash_sha512.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_kdf.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_kdf_blake2b.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_kx.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_onetimeauth.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_onetimeauth_poly1305.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_pwhash.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_pwhash_argon2i.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_pwhash_argon2id.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_pwhash_scryptsalsa208sha256.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_scalarmult.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_scalarmult_curve25519.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_scalarmult_ed25519.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_scalarmult_ristretto255.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_secretbox.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_secretbox_xchacha20poly1305.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_secretbox_xsalsa20poly1305.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_secretstream_xchacha20poly1305.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_shorthash.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_shorthash_siphash24.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_sign.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_sign_ed25519.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_sign_edwards25519sha512batch.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_stream.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_stream_chacha20.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_stream_salsa20.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_stream_salsa2012.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_stream_salsa208.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_stream_xchacha20.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_stream_xsalsa20.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_verify_16.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_verify_32.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\crypto_verify_64.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\export.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\randombytes.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\randombytes_internal_random.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\randombytes_sysrandom.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\runtime.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\utils.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium\version.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="libsodium\include\sodium.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="Encryptor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="libsodium\lib\x64\libsodium.lib">
+      <Filter>Libraries</Filter>
+    </Library>
   </ItemGroup>
 </Project>

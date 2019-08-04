@@ -26,7 +26,7 @@
 
 #### 加密算法
 
-加密算法基于 `libsodium` 库，拟采用 `AES-CTR` 或 `chacha20` 。
+加密算法基于 `libsodium` 库，使用 `xchacha20poly1305` 。
 
 在这里，选择加密算法的主要考量是速度和是否支持随机读取。每一个我们负责管理的 File Handler 都有一个其对应的 Encryptor，当拦截到 `seek` 等可能改变 cursor 位置的调用时，Encryptor 也应当做出相应改变。
 
