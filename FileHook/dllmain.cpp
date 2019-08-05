@@ -12,14 +12,16 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
 		fileHook = new FileHook();
-		fileHook->hookReadFile();
+		fileHook->hookRead();
+		fileHook->hookWrite();
 		break;
     case DLL_THREAD_ATTACH:
 		break;
     case DLL_THREAD_DETACH:
 		break;
     case DLL_PROCESS_DETACH:
-		fileHook->unhookReadFile();
+		fileHook->unhookRead();
+		fileHook->unhookWrite();
 		free(fileHook);
         break;
     }

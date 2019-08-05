@@ -2,20 +2,19 @@
 
 using namespace std;
 
-void FileTest::ReadTest() {
+void FileTest::ReadWriteTest() {
 	char data[101];
 
 	ifstream infile;
-	infile.open("testout.txt");
+	infile.open("Atestout.txt");
 	infile.getline(data, 100);
 	infile.close();
-	cout << data << endl;
+	//cout << data << endl;
 	cout << "Read finished" << endl;
-}
 
-void FileTest::WriteTest() {
 	ofstream outfile;
-	outfile.open("testout.txt");
-	outfile << "This is a test!" << endl;
+	outfile.open("Btestout.txt");
+	outfile << data << endl;
 	outfile.close();
 }
+

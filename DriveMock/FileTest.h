@@ -9,7 +9,6 @@ private:
 	std::string targetFile;
 public:
 	FileTest():targetFile("testout.txt"){}
-	void ReadTest();
-	void WriteTest();
+	void ReadWriteTest();
 };
 

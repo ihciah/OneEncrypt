@@ -2,9 +2,11 @@
 #include <Windows.h>
 #include <detours.h>
 #include <detver.h>
+#include <wchar.h>
 #include <unordered_map>
 #include <functional>
 #include <utility>
+#include <string>
 #include "Encryptor.h"
 
 template<typename T>
@@ -33,6 +35,10 @@ private:
 	unsigned char masterKey[crypto_stream_xchacha20_KEYBYTES];
 
 public:
+	FileHook();
+	void print(const char s[]);
+	void println(const char s[]);
+
 	READFILE realReadFile = nullptr;
 	READFILEEX realReadFileEx = nullptr;
 	READFILESCATTER realReadFileScatter = nullptr;
@@ -40,8 +46,10 @@ public:
 	CREATEFILEW realCreateFileW = nullptr;
 	CLOSEHANDLE realCloseHandle = nullptr;
 
-	void hookReadFile();
-	void unhookReadFile();
+	void hookRead();
+	void unhookRead();
+	void hookWrite();
+	void unhookWrite();
 	BOOL WINAPI FakeReadFile(HANDLE, LPVOID, DWORD, LPDWORD, LPOVERLAPPED);
 	BOOL WINAPI FakeReadFileEx(HANDLE, LPVOID, DWORD, LPOVERLAPPED, LPOVERLAPPED_COMPLETION_ROUTINE);
 	BOOL WINAPI FakeReadFileScatter(HANDLE, FILE_SEGMENT_ELEMENT[], DWORD, LPDWORD, LPOVERLAPPED);
