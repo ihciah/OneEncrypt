@@ -3,18 +3,14 @@
 using namespace std;
 
 void FileTest::ReadWriteTest() {
-	char data[101];
+	std::ifstream input("Atestout.txt", std::ios::binary);
+	std::ofstream output("Btestout.txt", std::ios::binary);
 
-	ifstream infile;
-	infile.open("Atestout.txt");
-	infile.getline(data, 100);
-	infile.close();
-	//cout << data << endl;
-	cout << "Read finished" << endl;
-
-	ofstream outfile;
-	outfile.open("Btestout.txt");
-	outfile << data << endl;
-	outfile.close();
+	std::copy(
+		std::istreambuf_iterator<char>(input),
+		std::istreambuf_iterator<char>(),
+		std::ostreambuf_iterator<char>(output));
+	input.close();
+	output.close();
 }
 
