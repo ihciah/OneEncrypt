@@ -1,4 +1,5 @@
 #include "FileHook.h"
+__declspec(dllimport) FileHook *fileHook;
 
 static void ReportError(const TCHAR* errorMsg)
 {
@@ -6,32 +7,26 @@ static void ReportError(const TCHAR* errorMsg)
 }
 
 BOOL WINAPI fakeReadFile(HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped) {
-	__declspec(dllimport) FileHook *fileHook;
 	return fileHook->FakeReadFile(hFile, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, lpOverlapped);
 }
 
 BOOL WINAPI fakeReadFileEx(HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPOVERLAPPED lpOverlapped, LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine) {
-	__declspec(dllimport) FileHook *fileHook;
 	return fileHook->FakeReadFileEx(hFile, lpBuffer, nNumberOfBytesToRead, lpOverlapped, lpCompletionRoutine);
 }
 
 BOOL WINAPI fakeReadFileScatter(HANDLE hFile, FILE_SEGMENT_ELEMENT aSegmentArray[], DWORD nNumberOfBytesToRead, LPDWORD lpReserved, LPOVERLAPPED lpOverlapped) {
-	__declspec(dllimport) FileHook *fileHook;
 	return fileHook->FakeReadFileScatter(hFile, aSegmentArray, nNumberOfBytesToRead, lpReserved, lpOverlapped);
 }
 
 BOOL WINAPI fakeWriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped) {
-	__declspec(dllimport) FileHook *fileHook;
 	return fileHook->FakeWriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
 }
 
 HANDLE WINAPI fakeCreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile) {
-	__declspec(dllimport) FileHook *fileHook;
 	return fileHook->FakeCreateFileW(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 }
 
 BOOL WINAPI fakeCloseHandle(HANDLE hObject) {
-	__declspec(dllimport) FileHook *fileHook;
 	return fileHook->FakeCloseHandle(hObject);
 }
 
@@ -59,7 +54,33 @@ void FileHook::print(const char s[]) {
 	}
 }
 
+void FileHook::print(const LPCWSTR s) {
+	DWORD written_b;
+	HANDLE outH = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (!outH) {
+		ReportError(TEXT("No standard handles associated with this app."));
+	}
+	else if (outH == INVALID_HANDLE_VALUE) {
+		TCHAR errMsg[100];
+		wsprintf(errMsg, TEXT("GetStdHandle() failed with error code %lu"), GetLastError());
+		ReportError(errMsg);
+	}
+	else {
+		if (!realWriteFile(outH, s, wcslen(s) * sizeof(WCHAR), &written_b, NULL))
+		{
+			TCHAR errMsg[100];
+			wsprintf(errMsg, TEXT("WriteFile() failed with error code %lu"), GetLastError());
+			ReportError(errMsg);
+		}
+	}
+}
+
 void FileHook::println(const char s[]) {
+	print(s);
+	print("\n");
+}
+
+void FileHook::println(const LPCWSTR s) {
 	print(s);
 	print("\n");
 }
@@ -113,6 +134,7 @@ void FileHook::unhookWrite() {
 
 BOOL WINAPI FileHook::FakeReadFile(HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped) {
 	println("ReadFile API called!");
+	if (lpOverlapped == nullptr) println("noOverlapped"); else println("withOverlapped");
 	BOOL ret = realReadFile(hFile, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, lpOverlapped);
 	std::unordered_map<HANDLE, Encryptor>::iterator it;
 	if ((it = encryptorMap.find(hFile)) == encryptorMap.end())
@@ -152,8 +174,9 @@ BOOL WINAPI FileHook::FakeWriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumbe
 
 HANDLE WINAPI FileHook::FakeCreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
 {
-	println("CreateFileW API called!");
+	print("CreateFileW API called: ");
 	HANDLE ret = realCreateFileW(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+	println(lpFileName);
 	if (wcsstr(lpFileName, L"testout.txt") != nullptr)
 		encryptorMap[ret] = Encryptor(masterKey, lpFileName);
 	return ret;
@@ -165,5 +188,3 @@ BOOL WINAPI FileHook::FakeCloseHandle(HANDLE hObject) {
 	encryptorMap.erase(hObject);
 	return ret;
 }
-
-

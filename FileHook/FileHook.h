@@ -38,6 +38,8 @@ public:
 	FileHook();
 	void print(const char s[]);
 	void println(const char s[]);
+	void print(const LPCWSTR s);
+	void println(const LPCWSTR s);
 
 	READFILE realReadFile = nullptr;
 	READFILEEX realReadFileEx = nullptr;

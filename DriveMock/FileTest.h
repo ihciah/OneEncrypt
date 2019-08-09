@@ -10,5 +10,6 @@ private:
 public:
 	FileTest():targetFile("testout.txt"){}
 	void ReadWriteTest();
+	void ReadWriteTestMultipleTimes();
 };
 

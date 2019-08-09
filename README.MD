@@ -42,6 +42,28 @@
 
 
 
+#### API
+
+- ReadFile 读文件
+- WriteFile 写文件
+- CreateFile 打开文件/文件夹
+- CloseFile 关闭文件/文件夹
+- QueryDirectory
+- QueryAttributeTagFile
+- QueryBasicInformationFile
+- QueryAllInformationFile
+- QueryNameInformationFile
+- QueryNormalizedNameInformationFile
+- QueryObjectIdInformationFile
+- QueryStreamInformationFile
+- QuerySecurityFile
+- QueryRemoteProtocolInformation
+- QueryEAFile
+- QueryInformationVolume
+- FileSystemControl
+
+
+
 #### 开发进度
 
 - [Done] 启动器注入 `DLL` 流程
