@@ -27,6 +27,15 @@
     <ClCompile Include="Encryptor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FileHookCommon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="inih\ini.c">
+      <Filter>Libraries</Filter>
+    </ClCompile>
+    <ClCompile Include="inih\cpp\INIReader.cpp">
+      <Filter>Libraries</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -226,6 +235,12 @@
     </ClInclude>
     <ClInclude Include="Encryptor.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inih\cpp\INIReader.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="inih\ini.h">
+      <Filter>Libraries</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -7,6 +7,8 @@ Encryptor::Encryptor(const unsigned char *k, const unsigned char *n){
 	memcpy_s(nonce, crypto_stream_xchacha20_NONCEBYTES, n, crypto_stream_xchacha20_NONCEBYTES);
 }
 
+// Temp solution: hash(fileName) -> nonce
+// v1.0: use all zero
 Encryptor::Encryptor(const unsigned char * k, LPCWSTR fileName){
 	key = k;
 	// TODO: read nonce from key.storage. Current nonce is all zero.

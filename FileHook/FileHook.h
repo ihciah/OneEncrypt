@@ -7,7 +7,11 @@
 #include <functional>
 #include <utility>
 #include <string>
+#include <pathcch.h>
+#include "inih/cpp/INIReader.h"
 #include "Encryptor.h"
+
+#pragma comment(lib, "Pathcch.lib")
 
 template<typename T>
 void HookFunction(T &fn_real, _In_ PVOID fn_mine)
@@ -21,6 +25,10 @@ void UnhookFunction(T &fn_real, _In_ PVOID fn_mine)
 	DetourDetach(&(PVOID&)fn_real, fn_mine);
 }
 
+errno_t GetConfigPath(char* dest);
+
+static void ReportError(const TCHAR* errorMsg);
+
 typedef BOOL(WINAPI *READFILE) (HANDLE, LPVOID, DWORD, LPDWORD, LPOVERLAPPED);
 typedef BOOL(WINAPI *READFILEEX)(HANDLE, LPVOID, DWORD, LPOVERLAPPED, LPOVERLAPPED_COMPLETION_ROUTINE);
 typedef BOOL(WINAPI *READFILESCATTER)(HANDLE, FILE_SEGMENT_ELEMENT[], DWORD, LPDWORD, LPOVERLAPPED);
@@ -32,6 +40,7 @@ class FileHook {
 private:
 	std::unordered_map<HANDLE, Encryptor> encryptorMap;
 	std::allocator<unsigned char> allocator;
+	LPCWSTR EncryptBase;
 	unsigned char masterKey[crypto_stream_xchacha20_KEYBYTES];
 
 public:

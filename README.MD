@@ -46,9 +46,16 @@
 
 - ReadFile 读文件
 - WriteFile 写文件
-- CreateFile 打开文件/文件夹
-- CloseFile 关闭文件/文件夹
-- QueryDirectory
+- CreateFileW 打开文件/文件夹
+- CloseHandle 关闭文件/文件夹
+- [Delay] FindFirstFileW 列目录
+- [Delay] GetFileAttributesW 获取文件/文件夹属性
+- [Delay] GetFileInformationByHandle 
+- [Delay] GetFileInformationByHandleEx
+- 
+
+
+
 - QueryAttributeTagFile
 - QueryBasicInformationFile
 - QueryAllInformationFile
