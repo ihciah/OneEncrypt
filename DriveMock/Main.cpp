@@ -4,10 +4,12 @@
 using namespace std;
 
 int main() {
-	cout << "DriveMock started." << endl;
+	cout << "[DriveMock] DriveMock started." << endl;
 	auto fileTest = FileTest();
-	fileTest.ReadWriteTest();
+	fileTest.ReadWriteTest("unenc/file.txt", "enc/file.txt");
+	fileTest.ReadWriteTest("enc/file.txt", "unenc/filew.txt");
+
 	//fileTest.ReadWriteTestMultipleTimes();
-	cout << "read write finished." << endl;
+	cout << "[DriveMock] Read write finished." << endl;
 	system("pause");
 }

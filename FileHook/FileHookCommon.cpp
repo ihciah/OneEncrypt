@@ -1,26 +1,14 @@
 #include "FileHook.h"
+#include <iostream>
+#include <fstream>
+#include <locale>
+#include <codecvt>
 
 __declspec(dllimport) FileHook *fileHook;
-
-const unsigned char ZEROSALT[crypto_pwhash_SALTBYTES] = { 0 };
-const auto OPSLIMIT = crypto_pwhash_OPSLIMIT_MIN;
-const auto MEMLIMIT = crypto_pwhash_MEMLIMIT_MIN;
-const auto ALG = crypto_pwhash_ALG_DEFAULT;
 
 static void ReportError(const TCHAR* errorMsg)
 {
 	MessageBox(NULL, errorMsg, NULL, MB_OK | MB_ICONERROR);
-}
-
-errno_t GetConfigPath(char* dest)
-{
-	WCHAR pwd[MAX_PATH];
-	DWORD length = GetModuleFileName(NULL, pwd, MAX_PATH);
-	PathCchRemoveFileSpec(pwd, MAX_PATH);
-	PathCchCombine(pwd, MAX_PATH, pwd, L"config.ini");
-
-	size_t converted;
-	return wcstombs_s(&converted, dest, MAX_PATH, pwd, MAX_PATH);
 }
 
 // Read configure file
@@ -28,17 +16,20 @@ FileHook::FileHook() {
 	DetourRestoreAfterWith();
 	realWriteFile = (WRITEFILE)DetourFindFunction("Kernel32.dll", "WriteFile");
 
-	print("Trying to get current");
-	char path[MAX_PATH];
-	GetConfigPath(path);
+	ConfigLoader configLoader(CONFIG_FILE);
+	char key[MAX_KEY + 1];
+	configLoader.GetEncryptBase(encryptBase);
+	configLoader.GetKey(key);
 
-	INIReader reader(path);
-	auto key = reader.GetString("global", "key", "");
-	print("loaded key:");
-	println(key.c_str());
+	//// DEBUG
+	//std::wofstream f("log.txt");
+	//std::locale utf8_locale(f.getloc(), new std::codecvt_utf8<wchar_t>);
+	//f.imbue(utf8_locale);
+	//f << encryptBase;
+	//f.close();
 
-	int ret = crypto_pwhash(masterKey, crypto_stream_xchacha20_KEYBYTES, key.c_str(), key.size(), ZEROSALT, OPSLIMIT, MEMLIMIT, ALG);
-	print(ret == 0 ? "pwhash succ" : "pwhash fail"); // DEBUG
+	int ret = crypto_pwhash(masterKey, crypto_stream_xchacha20_KEYBYTES, key, strlen(key), ZEROSALT, OPSLIMIT, MEMLIMIT, ALG);
+	std::cout << "[FileHook] " << (ret == 0 ? "Pwhash succ" : "Pwhash fail") << std::endl; // DEBUG
 }
 
 void FileHook::print(const char s[]) {
@@ -62,35 +53,20 @@ void FileHook::print(const char s[]) {
 	}
 }
 
-void FileHook::print(const LPCWSTR s) {
-	DWORD written_b;
-	HANDLE outH = GetStdHandle(STD_OUTPUT_HANDLE);
-	if (!outH) {
-		ReportError(TEXT("No standard handles associated with this app."));
-	}
-	else if (outH == INVALID_HANDLE_VALUE) {
-		TCHAR errMsg[100];
-		wsprintf(errMsg, TEXT("GetStdHandle() failed with error code %lu"), GetLastError());
-		ReportError(errMsg);
-	}
-	else {
-		if (!realWriteFile(outH, s, wcslen(s) * sizeof(WCHAR), &written_b, NULL))
-		{
-			TCHAR errMsg[100];
-			wsprintf(errMsg, TEXT("WriteFile() failed with error code %lu"), GetLastError());
-			ReportError(errMsg);
-		}
-	}
-}
-
 void FileHook::println(const char s[]) {
 	print(s);
 	print("\n");
 }
 
-void FileHook::println(const LPCWSTR s) {
-	print(s);
-	print("\n");
+class chs_codecvt : public std::codecvt_byname<wchar_t, char, std::mbstate_t> {
+public:
+	chs_codecvt() : codecvt_byname("chs") { }
+};
+
+void FileHook::println(LPCWSTR w) {
+	std::wstring_convert<chs_codecvt> converter;
+	std::string string = converter.to_bytes(w);
+	println(string.c_str());
 }
 
 BOOL WINAPI fakeReadFile(HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped) {
@@ -132,7 +108,8 @@ void FileHook::hookRead() {
 	HookFunction(realCreateFileW, fakeCreateFileW);
 	HookFunction(realCloseHandle, fakeCloseHandle);
 	DetourTransactionCommit();
-	println("Read hooked");
+	// DEBUG
+	std::cout << "[FileHook] Read hooked" << std::endl;
 }
 
 void FileHook::hookWrite() {
@@ -142,7 +119,8 @@ void FileHook::hookWrite() {
 	realWriteFile = (WRITEFILE)DetourFindFunction("Kernel32.dll", "WriteFile");
 	HookFunction(realWriteFile, fakeWriteFile);
 	DetourTransactionCommit();
-	println("Write hooked");
+	// DEBUG
+	std::cout << "[FileHook] Write hooked" << std::endl;
 }
 
 void FileHook::unhookRead() {

@@ -9,7 +9,7 @@ private:
 	std::string targetFile;
 public:
 	FileTest():targetFile("testout.txt"){}
-	void ReadWriteTest();
-	void ReadWriteTestMultipleTimes();
+	void ReadWriteTest(std::string srcPath, std::string dstPath);
+	void ReadWriteTestMultipleTimes(std::string srcPath, std::string dstPath);
 };
 

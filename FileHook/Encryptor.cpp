@@ -11,6 +11,7 @@ Encryptor::Encryptor(const unsigned char *k, const unsigned char *n){
 // v1.0: use all zero
 Encryptor::Encryptor(const unsigned char * k, LPCWSTR fileName){
 	key = k;
+	// Attention: fileName cannot be used to store in memory directly! Copy it.
 	// TODO: read nonce from key.storage. Current nonce is all zero.
 	memset(nonce, 0, crypto_stream_xchacha20_NONCEBYTES);
 }

@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ConfigLoader.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Encryptor.cpp" />
     <ClCompile Include="FileHook.cpp" />
@@ -162,6 +163,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="common.h" />
+    <ClInclude Include="ConfigLoader.h" />
     <ClInclude Include="Encryptor.h" />
     <ClInclude Include="FileHook.h" />
     <ClInclude Include="inih\cpp\INIReader.h" />

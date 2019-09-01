@@ -1,5 +1,5 @@
 #pragma once
-#include <Windows.h>
+#include "common.h"
 #include <detours.h>
 #include <detver.h>
 #include <wchar.h>
@@ -7,11 +7,9 @@
 #include <functional>
 #include <utility>
 #include <string>
-#include <pathcch.h>
-#include "inih/cpp/INIReader.h"
+#include <memory>
 #include "Encryptor.h"
-
-#pragma comment(lib, "Pathcch.lib")
+#include "ConfigLoader.h"
 
 template<typename T>
 void HookFunction(T &fn_real, _In_ PVOID fn_mine)
@@ -40,15 +38,14 @@ class FileHook {
 private:
 	std::unordered_map<HANDLE, Encryptor> encryptorMap;
 	std::allocator<unsigned char> allocator;
-	LPCWSTR EncryptBase;
+	wchar_t encryptBase[MAX_PATH];
 	unsigned char masterKey[crypto_stream_xchacha20_KEYBYTES];
 
 public:
 	FileHook();
 	void print(const char s[]);
 	void println(const char s[]);
-	void print(const LPCWSTR s);
-	void println(const LPCWSTR s);
+	void println(LPCWSTR);
 
 	READFILE realReadFile = nullptr;
 	READFILEEX realReadFileEx = nullptr;

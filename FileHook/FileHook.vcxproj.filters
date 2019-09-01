@@ -36,6 +36,9 @@
     <ClCompile Include="inih\cpp\INIReader.cpp">
       <Filter>Libraries</Filter>
     </ClCompile>
+    <ClCompile Include="ConfigLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -241,6 +244,12 @@
     </ClInclude>
     <ClInclude Include="inih\ini.h">
       <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

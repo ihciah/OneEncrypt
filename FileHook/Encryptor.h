@@ -1,10 +1,7 @@
 #pragma once
 #include <string>
 #include <algorithm>
-#include <Windows.h>
-#define SODIUM_STATIC 1
-#include "libsodium/include/sodium.h"
-#include "libsodium/include/sodium/crypto_stream_xchacha20.h"
+#include "common.h"
 
 const uint64_t BLOCKSIZE = 1024;
 
