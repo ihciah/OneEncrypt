@@ -158,6 +158,7 @@
     <ClCompile Include="FileHookCommon.cpp" />
     <ClCompile Include="inih\cpp\INIReader.cpp" />
     <ClCompile Include="inih\ini.c" />
+    <ClCompile Include="Logger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -232,6 +233,7 @@
     <ClInclude Include="libsodium\include\sodium\runtime.h" />
     <ClInclude Include="libsodium\include\sodium\utils.h" />
     <ClInclude Include="libsodium\include\sodium\version.h" />
+    <ClInclude Include="Logger.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libsodium\lib\x64\libsodium.lib" />

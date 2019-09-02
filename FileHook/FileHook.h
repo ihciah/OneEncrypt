@@ -10,6 +10,7 @@
 #include <memory>
 #include "Encryptor.h"
 #include "ConfigLoader.h"
+#include "Logger.h"
 
 template<typename T>
 void HookFunction(T &fn_real, _In_ PVOID fn_mine)
@@ -22,10 +23,6 @@ void UnhookFunction(T &fn_real, _In_ PVOID fn_mine)
 {
 	DetourDetach(&(PVOID&)fn_real, fn_mine);
 }
-
-errno_t GetConfigPath(char* dest);
-
-static void ReportError(const TCHAR* errorMsg);
 
 typedef BOOL(WINAPI *READFILE) (HANDLE, LPVOID, DWORD, LPDWORD, LPOVERLAPPED);
 typedef BOOL(WINAPI *READFILEEX)(HANDLE, LPVOID, DWORD, LPOVERLAPPED, LPOVERLAPPED_COMPLETION_ROUTINE);
@@ -43,6 +40,7 @@ private:
 
 public:
 	FileHook();
+	std::unique_ptr<Logger> logger;
 	void print(const char s[]);
 	void println(const char s[]);
 	void println(LPCWSTR);
