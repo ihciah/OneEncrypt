@@ -1,7 +1,7 @@
 #pragma once
+#include "common.h"
 #include <string>
 #include <algorithm>
-#include "common.h"
 
 const uint64_t BLOCKSIZE = 1024;
 

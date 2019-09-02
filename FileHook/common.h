@@ -1,7 +1,9 @@
 #pragma once
+#define SODIUM_STATIC 1
+#include <memory>
+#include <iostream>
 #include <Windows.h>
 #include <shlwapi.h>
-#define SODIUM_STATIC 1
 #include "libsodium/include/sodium.h"
 #include "libsodium/include/sodium/crypto_stream_xchacha20.h"
 

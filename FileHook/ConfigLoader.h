@@ -1,8 +1,6 @@
 #pragma once
-#include <memory>
-#include <Windows.h>
-#include <pathcch.h>
 #include "common.h"
+#include <pathcch.h>
 #include "inih/cpp/INIReader.h"
 
 #pragma comment(lib, "Pathcch.lib")

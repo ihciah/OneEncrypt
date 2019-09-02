@@ -1,9 +1,7 @@
 #include "FileHook.h"
-#include <iostream>
 #include <fstream>
 #include <locale>
 #include <codecvt>
-#include <memory>
 
 __declspec(dllimport) FileHook *fileHook;
 

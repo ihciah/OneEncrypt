@@ -1,5 +1,4 @@
 #include "ConfigLoader.h";
-#include <iostream>
 
 /* Get current file path and combine CONFIG_FILE
    dest: copy to dest in MBS

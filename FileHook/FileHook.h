@@ -7,7 +7,6 @@
 #include <functional>
 #include <utility>
 #include <string>
-#include <memory>
 #include "Encryptor.h"
 #include "ConfigLoader.h"
 #include "Logger.h"
@@ -41,9 +40,6 @@ private:
 public:
 	FileHook();
 	std::unique_ptr<Logger> logger;
-	void print(const char s[]);
-	void println(const char s[]);
-	void println(LPCWSTR);
 
 	READFILE realReadFile = nullptr;
 	READFILEEX realReadFileEx = nullptr;

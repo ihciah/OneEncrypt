@@ -1,4 +1,3 @@
-#include <Windows.h>
 #include "FileHook.h"
 
 __declspec(dllexport) FileHook *fileHook;
