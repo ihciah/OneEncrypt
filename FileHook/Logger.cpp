@@ -2,15 +2,26 @@
 
 using namespace std;
 
-Logger::Logger(const string filename) {
+Logger::Logger(string filename) {
 	ws = make_unique<wofstream>(wofstream(filename));
 	locale utf8_locale(ws->getloc(), new codecvt_utf8<wchar_t>);
 	ws->imbue(utf8_locale);
-	*ws << L"[Logger]Logger started." << endl;
+	*ws << L"[FileHook Boot Logger]Logger started." << endl;
 }
 
-Logger::Logger(const char* filename) {
+Logger::Logger(wstring filename) {
+	ws = make_unique<wofstream>(wofstream(filename));
+	locale utf8_locale(ws->getloc(), new codecvt_utf8<wchar_t>);
+	ws->imbue(utf8_locale);
+	*ws << L"[FileHook Boot Logger]Logger started." << endl;
+}
+
+Logger::Logger(char* filename) {
 	Logger(string(filename));
+}
+
+Logger::Logger(wchar_t* filename) {
+	Logger(wstring(filename));
 }
 
 Logger::~Logger() {

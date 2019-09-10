@@ -8,16 +8,18 @@ __declspec(dllimport) FileHook *fileHook;
 // Read configure file
 FileHook::FileHook() {
 	DetourRestoreAfterWith();
-	realWriteFile = (WRITEFILE)DetourFindFunction("Kernel32.dll", "WriteFile");
 
-	logger = std::make_unique<Logger>("log.txt");
+	logger = std::make_unique<Logger>(L"log.txt");
+	logger << "[FileHook Boot] " << "Start load config: " << CONFIG_FILE << "\n"; // DEBUG
+
 	ConfigLoader configLoader(CONFIG_FILE);
 	char key[MAX_KEY + 1];
 	configLoader.GetEncryptBase(encryptBase);
 	configLoader.GetKey(key);
+	logger << "[FileHook Boot ConfigLoader] " << "EncrpytBase: " << encryptBase << "; key: " << key << "\n"; // DEBUG
 
 	int ret = crypto_pwhash(masterKey, crypto_stream_xchacha20_KEYBYTES, key, strlen(key), ZEROSALT, OPSLIMIT, MEMLIMIT, ALG);
-	logger << "[FileHook] " << (ret == 0 ? "Pwhash succ" : "Pwhash fail") << "\n"; // DEBUG
+	logger << "[FileHook Boot ConfigLoader] " << (ret == 0 ? "Pwhash succ" : "Pwhash fail") << "\n"; // DEBUG
 }
 
 BOOL WINAPI fakeReadFile(HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped) {
@@ -60,7 +62,7 @@ void FileHook::hookRead() {
 	HookFunction(realCloseHandle, fakeCloseHandle);
 	DetourTransactionCommit();
 	// DEBUG
-	logger << "[FileHook] Read hooked\n";
+	logger << "[FileHook Boot] Read hooked\n";
 }
 
 void FileHook::hookWrite() {
@@ -71,7 +73,7 @@ void FileHook::hookWrite() {
 	HookFunction(realWriteFile, fakeWriteFile);
 	DetourTransactionCommit();
 	// DEBUG
-	logger << "[FileHook] Write hooked\n";
+	logger << "[FileHook Boot] Write hooked\n";
 }
 
 void FileHook::unhookRead() {

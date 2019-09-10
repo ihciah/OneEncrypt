@@ -8,8 +8,10 @@ class Logger {
 private:
 	std::unique_ptr<std::wofstream> ws;
 public:
-	Logger(const std::string);
-	Logger(const char*);
+	Logger(std::string);
+	Logger(std::wstring);
+	Logger(char*);
+	Logger(wchar_t*);
 	~Logger();
 	void Print(const std::wstring);
 	void Print(const std::string);
