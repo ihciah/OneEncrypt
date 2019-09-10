@@ -57,7 +57,7 @@ HANDLE WINAPI FileHook::FakeCreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAcces
 		logger << "[FileHook][CreateFileW] API failed\n";
 		return ret;
 	}
-	
+
 	if (wcscmp(lpFileName, L"CONIN$") == 0 || wcscmp(lpFileName, L"CONOUT$") == 0)
 		return ret;
 
@@ -73,7 +73,7 @@ HANDLE WINAPI FileHook::FakeCreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAcces
 		path = buffer;
 	}
 	logger << encryptBase << "; " << path << "\n";
-	
+
 	if (wcslen(path) >= wcslen(encryptBase) && wcsncmp(encryptBase, path, wcslen(encryptBase)) == 0 && PathIsPrefixW(encryptBase, path)) {
 		BOOL result = PathRelativePathToW(relativeBuffer, encryptBase, FILE_ATTRIBUTE_DIRECTORY, path, FILE_ATTRIBUTE_NORMAL);
 		if (!result) {
