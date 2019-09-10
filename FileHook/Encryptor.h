@@ -10,7 +10,7 @@ class Encryptor
 private:
 	const unsigned char *key;
 	unsigned char nonce[crypto_stream_xchacha20_NONCEBYTES];
-	long cursor = 0;
+	uint64_t cursor = 0;
 
 public:
 	Encryptor() {};
