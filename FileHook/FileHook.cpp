@@ -2,12 +2,11 @@
 
 BOOL WINAPI FileHook::FakeReadFile(HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped) {
 	BOOL ret = realReadFile(hFile, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, lpOverlapped);
-	std::unordered_map<HANDLE, Encryptor>::iterator it;
-	if ((it = encryptorMap.find(hFile)) == encryptorMap.end())
-		return ret;
-	// DEBUG
-	logger << "[FileHook][ReadFile] Will encrypt\n";
-	it->second.EncryptBuffer(static_cast<unsigned char*>(lpBuffer), *lpNumberOfBytesRead);
+
+	if (auto enc = GetHandleEncryptor(hFile); enc != nullptr) {
+		logger << "[FileHook][ReadFile] Will encrypt\n";
+		enc->EncryptBuffer(static_cast<unsigned char*>(lpBuffer), *lpNumberOfBytesRead);
+	}
 	return ret;
 }
 
@@ -27,17 +26,18 @@ BOOL WINAPI FileHook::FakeReadFileScatter(HANDLE hFile, FILE_SEGMENT_ELEMENT aSe
 
 BOOL WINAPI FileHook::FakeWriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped)
 {
-	std::unordered_map<HANDLE, Encryptor>::iterator it;
-	if ((it = encryptorMap.find(hFile)) == encryptorMap.end())
+	auto enc = GetHandleEncryptor(hFile);
+	if (enc == nullptr)
 		return realWriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
 	// DEBUG
 	logger << "[FileHook][WriteFile] Will decrypt\n";
 	unsigned char *buffer = allocator.allocate(nNumberOfBytesToWrite);
 	// TODO: the copy may unnecessary
 	memcpy_s(buffer, nNumberOfBytesToWrite, lpBuffer, nNumberOfBytesToWrite);
-	it->second.EncryptBuffer(buffer, nNumberOfBytesToWrite);
+	enc->EncryptBuffer(buffer, nNumberOfBytesToWrite);
 	BOOL ret = realWriteFile(hFile, buffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
 	// e.seek(lpNumberOfBytesWritten - nNumberOfBytesToWrite);
+	allocator.deallocate(buffer, nNumberOfBytesToWrite);
 	return ret;
 }
 
@@ -81,7 +81,7 @@ HANDLE WINAPI FileHook::FakeCreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAcces
 			return ret;
 		}
 
-		encryptorMap[ret] = Encryptor(masterKey, relativeBuffer);
+		AddHandle(ret, std::make_shared<Encryptor>(masterKey, relativeBuffer));
 		logger << "[FileHook][CreateFileW] Add handler to encryptorMap: " << relativeBuffer << "\n";
 	}
 	return ret;
@@ -91,6 +91,6 @@ BOOL WINAPI FileHook::FakeCloseHandle(HANDLE hObject) {
 	// DEBUG
 	logger << "[FileHook][CloseHandle] CloseHandle API called!\n";
 	BOOL ret = realCloseHandle(hObject);
-	encryptorMap.erase(hObject);
+	RemoveHandle(hObject);
 	return ret;
 }

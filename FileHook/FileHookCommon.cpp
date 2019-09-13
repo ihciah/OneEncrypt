@@ -22,6 +22,24 @@ FileHook::FileHook() {
 	logger << "[FileHook Boot ConfigLoader] " << (ret == 0 ? "Pwhash succ" : "Pwhash fail") << "\n"; // DEBUG
 }
 
+std::shared_ptr<Encryptor> FileHook::AddHandle(const HANDLE h, const std::shared_ptr<Encryptor> e) {
+	std::shared_lock<std::shared_timed_mutex> lock(mutex_);
+	encryptorMap_[h] = e;
+}
+
+void FileHook::RemoveHandle(const HANDLE& h) {
+	std::unique_lock<std::shared_timed_mutex> lock(mutex_);
+	encryptorMap_.erase(h);
+}
+
+std::shared_ptr<Encryptor> FileHook::GetHandleEncryptor(const HANDLE& h) {
+	std::shared_lock<std::shared_timed_mutex> lock(mutex_);
+	if (auto it = encryptorMap_.find(h); it != encryptorMap_.end()) {
+		return it->second;
+	}
+	return nullptr;
+}
+
 BOOL WINAPI fakeReadFile(HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped) {
 	return fileHook->FakeReadFile(hFile, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, lpOverlapped);
 }

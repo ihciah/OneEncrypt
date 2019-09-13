@@ -12,6 +12,8 @@ private:
 	unsigned char nonce[crypto_stream_xchacha20_NONCEBYTES];
 	uint64_t cursor = 0;
 
+	Encryptor(const Encryptor&);
+
 public:
 	Encryptor() {};
 	Encryptor(const unsigned char *k, const unsigned char *n);

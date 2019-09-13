@@ -7,6 +7,7 @@
 #include <functional>
 #include <utility>
 #include <string>
+#include <shared_mutex>
 #include "Encryptor.h"
 #include "ConfigLoader.h"
 #include "Logger.h"
@@ -32,14 +33,20 @@ using CLOSEHANDLE = BOOL(WINAPI *)(HANDLE);
 
 class FileHook {
 private:
-	std::unordered_map<HANDLE, Encryptor> encryptorMap;
+	mutable std::shared_timed_mutex mutex_;
+	std::unordered_map<HANDLE, std::shared_ptr<Encryptor>> encryptorMap_;
 	std::allocator<unsigned char> allocator;
 	wchar_t encryptBase[MAX_PATH];
 	unsigned char masterKey[crypto_stream_xchacha20_KEYBYTES];
 
+	std::shared_ptr<Encryptor> AddHandle(const HANDLE, const std::shared_ptr<Encryptor>);
+	void RemoveHandle(const HANDLE&);
+	std::shared_ptr<Encryptor> GetHandleEncryptor(const HANDLE&);
+
 public:
 	FileHook();
 	std::unique_ptr<Logger> logger;
+	std::shared_lock<std::shared_timed_mutex> Lock();
 
 	READFILE realReadFile = nullptr;
 	READFILEEX realReadFileEx = nullptr;
