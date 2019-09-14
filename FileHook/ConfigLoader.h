@@ -7,9 +7,9 @@
 
 class ConfigLoader {
 private:
-	std::unique_ptr<INIReader> reader;
+    std::unique_ptr<INIReader> reader;
 public:
-	ConfigLoader(PCWSTR configFileName);
-	errno_t GetEncryptBasePath(wchar_t* encryptBase);
-	errno_t GetKey(char* key);
+    ConfigLoader(PCWSTR configFileName);
+    errno_t GetEncryptBasePath(wchar_t* encryptBase);
+    errno_t GetKey(char* key);
 };

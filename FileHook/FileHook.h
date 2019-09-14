@@ -16,13 +16,13 @@
 template<typename T>
 void HookFunction(T &fn_real, _In_ PVOID fn_mine)
 {
-	DetourAttach(&(PVOID&)fn_real, fn_mine);
+    DetourAttach(&(PVOID&)fn_real, fn_mine);
 }
 
 template<typename T>
 void UnhookFunction(T &fn_real, _In_ PVOID fn_mine)
 {
-	DetourDetach(&(PVOID&)fn_real, fn_mine);
+    DetourDetach(&(PVOID&)fn_real, fn_mine);
 }
 
 using READFILE = BOOL(WINAPI *) (HANDLE, LPVOID, DWORD, LPDWORD, LPOVERLAPPED);
@@ -35,36 +35,36 @@ using SETFILEPOINTER = DWORD(WINAPI *)(HANDLE, LONG, PLONG, DWORD);
 
 class FileHook {
 private:
-	mutable std::shared_mutex mutex_;
-	std::unordered_map<HANDLE, std::shared_ptr<Encryptor>> encryptorMap_;
-	std::allocator<unsigned char> allocator;
-	wchar_t encryptBasePath[MAX_PATH];
-	unsigned char masterKey[crypto_stream_xchacha20_KEYBYTES];
+    mutable std::shared_mutex mutex_;
+    std::unordered_map<HANDLE, std::shared_ptr<Encryptor>> encryptorMap_;
+    std::allocator<unsigned char> allocator;
+    wchar_t encryptBasePath[MAX_PATH];
+    unsigned char masterKey[crypto_stream_xchacha20_KEYBYTES];
 
-	std::shared_ptr<Encryptor> AddHandleEncryptor(const HANDLE, const std::shared_ptr<Encryptor>);
-	void RemoveHandleEncryptor(const HANDLE&);
-	std::shared_ptr<Encryptor> GetHandleEncryptor(const HANDLE&);
+    std::shared_ptr<Encryptor> AddHandleEncryptor(const HANDLE, const std::shared_ptr<Encryptor>);
+    void RemoveHandleEncryptor(const HANDLE&);
+    std::shared_ptr<Encryptor> GetHandleEncryptor(const HANDLE&);
 
 public:
-	FileHook();
-	std::unique_ptr<Logger> logger;
+    FileHook();
+    std::unique_ptr<Logger> logger;
 
-	READFILE realReadFile = nullptr;
-	READFILEEX realReadFileEx = nullptr;
-	READFILESCATTER realReadFileScatter = nullptr;
-	WRITEFILE realWriteFile = nullptr;
-	CREATEFILEW realCreateFileW = nullptr;
-	CLOSEHANDLE realCloseHandle = nullptr;
+    READFILE realReadFile = nullptr;
+    READFILEEX realReadFileEx = nullptr;
+    READFILESCATTER realReadFileScatter = nullptr;
+    WRITEFILE realWriteFile = nullptr;
+    CREATEFILEW realCreateFileW = nullptr;
+    CLOSEHANDLE realCloseHandle = nullptr;
     SETFILEPOINTER realSetFilePointer = nullptr;
 
-	void Hook();
-	void Unhook();
+    void Hook();
+    void Unhook();
 
-	BOOL WINAPI FakeReadFile(HANDLE, LPVOID, DWORD, LPDWORD, LPOVERLAPPED);
-	BOOL WINAPI FakeReadFileEx(HANDLE, LPVOID, DWORD, LPOVERLAPPED, LPOVERLAPPED_COMPLETION_ROUTINE);
-	BOOL WINAPI FakeReadFileScatter(HANDLE, FILE_SEGMENT_ELEMENT[], DWORD, LPDWORD, LPOVERLAPPED);
-	BOOL WINAPI FakeWriteFile(HANDLE, LPCVOID, DWORD, LPDWORD, LPOVERLAPPED);
-	HANDLE WINAPI FakeCreateFileW(LPCWSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE);
-	BOOL WINAPI FakeCloseHandle(HANDLE);
+    BOOL WINAPI FakeReadFile(HANDLE, LPVOID, DWORD, LPDWORD, LPOVERLAPPED);
+    BOOL WINAPI FakeReadFileEx(HANDLE, LPVOID, DWORD, LPOVERLAPPED, LPOVERLAPPED_COMPLETION_ROUTINE);
+    BOOL WINAPI FakeReadFileScatter(HANDLE, FILE_SEGMENT_ELEMENT[], DWORD, LPDWORD, LPOVERLAPPED);
+    BOOL WINAPI FakeWriteFile(HANDLE, LPCVOID, DWORD, LPDWORD, LPOVERLAPPED);
+    HANDLE WINAPI FakeCreateFileW(LPCWSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE);
+    BOOL WINAPI FakeCloseHandle(HANDLE);
     DWORD WINAPI FakeSetFilePointer(HANDLE, LONG, PLONG, DWORD);
 };

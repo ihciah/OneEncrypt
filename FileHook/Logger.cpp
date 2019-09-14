@@ -3,59 +3,59 @@
 using namespace std;
 
 Logger::Logger(string filename) {
-	ws = make_unique<wofstream>(wofstream(filename));
-	locale utf8_locale(ws->getloc(), new codecvt_utf8<wchar_t>);
-	ws->imbue(utf8_locale);
-	*ws << L"[FileHook Boot Logger]Logger started." << endl;
+    ws = make_unique<wofstream>(wofstream(filename));
+    locale utf8_locale(ws->getloc(), new codecvt_utf8<wchar_t>);
+    ws->imbue(utf8_locale);
+    *ws << L"[FileHook Boot Logger]Logger started." << endl;
 }
 
 Logger::Logger(wstring filename) {
-	ws = make_unique<wofstream>(wofstream(filename));
-	locale utf8_locale(ws->getloc(), new codecvt_utf8<wchar_t>);
-	ws->imbue(utf8_locale);
-	*ws << L"[FileHook Boot Logger]Logger started." << endl;
+    ws = make_unique<wofstream>(wofstream(filename));
+    locale utf8_locale(ws->getloc(), new codecvt_utf8<wchar_t>);
+    ws->imbue(utf8_locale);
+    *ws << L"[FileHook Boot Logger]Logger started." << endl;
 }
 
 Logger::Logger(char* filename) {
-	Logger(string(filename));
+    Logger(string(filename));
 }
 
 Logger::Logger(wchar_t* filename) {
-	Logger(wstring(filename));
+    Logger(wstring(filename));
 }
 
 Logger::~Logger() {
-	ws->close();
-	ws.~unique_ptr();
+    ws->close();
+    ws.~unique_ptr();
 }
 
 void Logger::Print(const wstring logString) {
-	*ws << logString;
-	ws->flush();
+    *ws << logString;
+    ws->flush();
 }
 
 void Logger::Print(const string logString) {
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	*ws << converter.from_bytes(logString);
-	ws->flush();
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    *ws << converter.from_bytes(logString);
+    ws->flush();
 }
 
 std::unique_ptr<Logger>& operator<<(std::unique_ptr<Logger>& out, const string& s) {
-	out->Print(s);
-	return out;
+    out->Print(s);
+    return out;
 }
 
 std::unique_ptr<Logger>& operator<<(std::unique_ptr<Logger>& out, const wstring& s) {
-	out->Print(s);
-	return out;
+    out->Print(s);
+    return out;
 }
 
 std::unique_ptr<Logger>& operator<<(std::unique_ptr<Logger>& out, const char* s) {
-	out->Print(string(s));
-	return out;
+    out->Print(string(s));
+    return out;
 }
 
 std::unique_ptr<Logger>& operator<<(std::unique_ptr<Logger>& out, const wchar_t* s) {
-	out->Print(wstring(s));
-	return out;
+    out->Print(wstring(s));
+    return out;
 }

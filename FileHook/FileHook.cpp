@@ -172,7 +172,7 @@ DWORD WINAPI FileHook::FakeSetFilePointer(HANDLE hFile, LONG lDistanceToMove, PL
     }
 
     DWORD ret;
-    switch (dwMoveMethod){
+    switch (dwMoveMethod) {
     case FILE_BEGIN:
         ret = realSetFilePointer(hFile, lDistanceToMove + NONCE_LEN, lpDistanceToMoveHigh, dwMoveMethod);
         if (ret == INVALID_SET_FILE_POINTER && GetLastError() != NOERROR) {
