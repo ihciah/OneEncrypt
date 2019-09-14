@@ -46,7 +46,6 @@ private:
 public:
 	FileHook();
 	std::unique_ptr<Logger> logger;
-	std::shared_lock<std::shared_timed_mutex> Lock();
 
 	READFILE realReadFile = nullptr;
 	READFILEEX realReadFileEx = nullptr;

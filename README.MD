@@ -4,7 +4,7 @@
 
 利用 DLL 注入实现的无进程无感知 OneDrive 加密器
 
-#### 工作方式
+### 工作方式
 
 1. 通过 `IFEO` 劫持原生 `OneDrive` 客户端进程
 2. 以调试器启动 `OneDrive` 绕过 `IFEO`，注入负责 `IO` 劫持的 `DLL`
@@ -16,7 +16,7 @@
 
 
 
-#### 劫持实现
+### 劫持实现
 
 系统调用劫持基于 `Detours` 库。
 
@@ -24,59 +24,62 @@
 
 
 
-#### 加密算法
+### 加密算法
 
 加密算法基于 `libsodium` 库，使用 `xchacha20poly1305` 。
 
 在这里，选择加密算法的主要考量是速度和是否支持随机读取。每一个我们负责管理的 File Handler 都有一个其对应的 Encryptor，当拦截到 `seek` 等可能改变 cursor 位置的调用时，Encryptor 也应当做出相应改变。
 
-参考 `BoxCryptor` 的实现，我们在每一个开启了加密的文件夹中都放置一个 `key.storage` 文件，该文件存储了文件名和其随机 nonce 的对应关系，该文件使用 MasterKey 加密 （其nonce直接存储于文件头部）。
+~~参考 `BoxCryptor` 的实现，我们在每一个开启了加密的文件夹中都放置一个 `key.storage` 文件，该文件存储了文件名和其随机 nonce 的对应关系，该文件使用 MasterKey 加密 （其nonce直接存储于文件头部）。~~
 
-随机 nonce 应在每次文件更新时都随机生成并重新加密[待定1]。
+~~随机 nonce 应在每次文件更新时都随机生成并重新加密[待定1]。~~
+
+key 与文件分开放置可能会导致客户端尝试从服务端同步数据时，由于文件的同步顺序不确定导致可能不能解密。BoxCryptor 没有该问题，因为其是用户需要使用该文件时才解密，而这时 Onedrive 已经同步完文件；若未同步 key.storage 文件，则不对用户显示该目录的所有文件即可。
+
+但是将文件的 `nonce` 放置在文件内有一定的问题。首先是实现会更复杂，文件长度的不一致导致需要 Hook 更多 API ，并且加密解密的过程也需要额外做一些处理。
+
+更严重的问题是安全问题。
+
+1. 对于已知明文的文件(如很多固定的二进制文件)，远程可以拿到一对 `nonce` 和 `enc(key, nonce)` 的对应。这样远端至少可以任意修改已知文件。
+2. 对于未知的文件，由于无条件接收服务端传送的文件，所以该 `nonce` 可以被远端覆盖掉。此时若接收该远程文件，则本地会解密到错误的密文。
+
+在这种场景下，`alpha` 版本接受该安全风险。
 
 
 
-#### 待定
-
-1. 是否支持增量更新？调研目前通用网盘对增量更新的支持性。
-
-
-
-#### API
+### API
 
 - ReadFile 读文件
 - WriteFile 写文件
 - CreateFileW 打开文件/文件夹
 - CloseHandle 关闭文件/文件夹
-- [Delay] FindFirstFileW 列目录
-- [Delay] GetFileAttributesW 获取文件/文件夹属性
-- [Delay] GetFileInformationByHandle 
-- [Delay] GetFileInformationByHandleEx
-- 
+- FindFirstFileW 列目录
+- GetFileAttributesW 获取文件/文件夹属性
+- GetFileInformationByHandle 
+- GetFileInformationByHandleEx
 
 
 
-- QueryAttributeTagFile
-- QueryBasicInformationFile
-- QueryAllInformationFile
-- QueryNameInformationFile
-- QueryNormalizedNameInformationFile
-- QueryObjectIdInformationFile
-- QueryStreamInformationFile
-- QuerySecurityFile
-- QueryRemoteProtocolInformation
-- QueryEAFile
-- QueryInformationVolume
-- FileSystemControl
+### RoadMap
 
+#### Alpha 版本
 
+- 注入启动器
+- 文件头部放置 `nonce` 
+- 不支持修改 `key`
+- 支持可配置的 `key` 和加密路径
+- API 支持：
+  - [Done] ReadFile
+  - [Done] WriteFile
+  - [Done] CreateFileW
+  - [Done] CloseHandle
 
-#### 开发进度
+#### Beta 版本
 
-- [Done] 启动器注入 `DLL` 流程
-- [Done] 有状态函数劫持
-- [Working] 实现文件系统基本 API HOOK
-- [Working] 加密模块实现
-- [Delay] 实现文件系统全部 API HOOK
-- [Delay] `IFEO` 劫持启动
-- [Delay] 支持 MasterKey 修改
+- 更完善的 API 支持
+
+- 对 MBS 支持
+- 对软链接的支持
+- 支持修改 `key`
+- 区分不同 `Onedrive` 进程
+- `IFEO` 方式启动
