@@ -21,7 +21,7 @@ ConfigLoader::ConfigLoader(PCWSTR configFileName) {
 	reader = std::make_unique<INIReader>(path);
 }
 
-errno_t ConfigLoader::GetEncryptBase(wchar_t* encryptBase) {
+errno_t ConfigLoader::GetEncryptBasePath(wchar_t* encryptBase) {
 	auto folderPath = reader->GetString("global", "path", "WRONGPATH");
 	std::cout << "[ConfigLoader] FolderPath loaded: " << folderPath << std::endl;
 

@@ -14,27 +14,28 @@ FileHook::FileHook() {
 
 	ConfigLoader configLoader(CONFIG_FILE);
 	char key[MAX_KEY + 1];
-	configLoader.GetEncryptBase(encryptBase);
+	configLoader.GetEncryptBasePath(encryptBasePath);
 	configLoader.GetKey(key);
-	logger << "[FileHook Boot ConfigLoader] " << "EncrpytBase: " << encryptBase << "; key: " << key << "\n"; // DEBUG
+	logger << "[FileHook Boot ConfigLoader] " << "EncrpytBasePath: " << encryptBasePath << "; key: " << key << "\n"; // DEBUG
 
 	int ret = crypto_pwhash(masterKey, crypto_stream_xchacha20_KEYBYTES, key, strlen(key), ZEROSALT, OPSLIMIT, MEMLIMIT, ALG);
-	logger << "[FileHook Boot ConfigLoader] " << (ret == 0 ? "Pwhash succ" : "Pwhash fail") << "\n"; // DEBUG
+	logger << "[FileHook Boot ConfigLoader] Calculate pwhash " << (ret == 0 ? "succeed" : "failed") << "\n"; // DEBUG
 }
 
-std::shared_ptr<Encryptor> FileHook::AddHandle(const HANDLE h, const std::shared_ptr<Encryptor> e) {
-	std::shared_lock<std::shared_timed_mutex> lock(mutex_);
+std::shared_ptr<Encryptor> FileHook::AddHandleEncryptor(const HANDLE h, const std::shared_ptr<Encryptor> e) {
+	std::shared_lock lock(mutex_);
 	encryptorMap_[h] = e;
 }
 
-void FileHook::RemoveHandle(const HANDLE& h) {
-	std::unique_lock<std::shared_timed_mutex> lock(mutex_);
+void FileHook::RemoveHandleEncryptor(const HANDLE& h) {
+	std::unique_lock lock(mutex_);
 	encryptorMap_.erase(h);
 }
 
 std::shared_ptr<Encryptor> FileHook::GetHandleEncryptor(const HANDLE& h) {
-	std::shared_lock<std::shared_timed_mutex> lock(mutex_);
+	std::shared_lock lock(mutex_);
 	if (auto it = encryptorMap_.find(h); it != encryptorMap_.end()) {
+        logger << "[FileHook] GetHandleEncryptor invoke finished\n";
 		return it->second;
 	}
 	return nullptr;
@@ -64,7 +65,7 @@ BOOL WINAPI fakeCloseHandle(HANDLE hObject) {
 	return fileHook->FakeCloseHandle(hObject);
 }
 
-void FileHook::hookRead() {
+void FileHook::Hook() {
 	DetourRestoreAfterWith();
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
@@ -73,28 +74,19 @@ void FileHook::hookRead() {
 	realReadFileScatter = (READFILESCATTER)DetourFindFunction("Kernel32.dll", "ReadFileScatter");
 	realCreateFileW = (CREATEFILEW)DetourFindFunction("Kernel32.dll", "CreateFileW");
 	realCloseHandle = (CLOSEHANDLE)DetourFindFunction("Kernel32.dll", "CloseHandle");
+    realWriteFile = (WRITEFILE)DetourFindFunction("Kernel32.dll", "WriteFile");
 	HookFunction(realReadFile, fakeReadFile);
 	HookFunction(realReadFileEx, fakeReadFileEx);
 	HookFunction(realReadFileScatter, fakeReadFileScatter);
 	HookFunction(realCreateFileW, fakeCreateFileW);
 	HookFunction(realCloseHandle, fakeCloseHandle);
+    HookFunction(realWriteFile, fakeWriteFile);
 	DetourTransactionCommit();
-	// DEBUG
-	logger << "[FileHook Boot] Read hooked\n";
+
+	logger << "[FileHook Boot] Hooked\n";
 }
 
-void FileHook::hookWrite() {
-	DetourRestoreAfterWith();
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	realWriteFile = (WRITEFILE)DetourFindFunction("Kernel32.dll", "WriteFile");
-	HookFunction(realWriteFile, fakeWriteFile);
-	DetourTransactionCommit();
-	// DEBUG
-	logger << "[FileHook Boot] Write hooked\n";
-}
-
-void FileHook::unhookRead() {
+void FileHook::Unhook() {
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 	UnhookFunction(realReadFile, fakeReadFile);
@@ -102,12 +94,6 @@ void FileHook::unhookRead() {
 	UnhookFunction(realReadFileScatter, fakeReadFileScatter);
 	UnhookFunction(realCreateFileW, fakeCreateFileW);
 	UnhookFunction(realCloseHandle, fakeCloseHandle);
-	DetourTransactionCommit();
-}
-
-void FileHook::unhookWrite() {
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	UnhookFunction(realWriteFile, fakeWriteFile);
+    UnhookFunction(realWriteFile, fakeWriteFile);
 	DetourTransactionCommit();
 }

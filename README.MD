@@ -51,6 +51,7 @@ key 与文件分开放置可能会导致客户端尝试从服务端同步数据�
 
 - ReadFile 读文件
 - WriteFile 写文件
+- SetFilePointer 改变文件游标
 - CreateFileW 打开文件/文件夹
 - CloseHandle 关闭文件/文件夹
 - FindFirstFileW 列目录
@@ -73,6 +74,7 @@ key 与文件分开放置可能会导致客户端尝试从服务端同步数据�
   - [Done] WriteFile
   - [Done] CreateFileW
   - [Done] CloseHandle
+  - [Done] SetFilePointer
 
 #### Beta 版本
 

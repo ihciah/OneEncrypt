@@ -16,3 +16,4 @@ const unsigned char ZEROSALT[crypto_pwhash_SALTBYTES] = { 0 };
 const auto OPSLIMIT = crypto_pwhash_OPSLIMIT_MIN;
 const auto MEMLIMIT = crypto_pwhash_MEMLIMIT_MIN;
 const auto ALG = crypto_pwhash_ALG_DEFAULT;
+const auto NONCE_LEN = crypto_stream_xchacha20_NONCEBYTES;

@@ -10,6 +10,6 @@ private:
 	std::unique_ptr<INIReader> reader;
 public:
 	ConfigLoader(PCWSTR configFileName);
-	errno_t GetEncryptBase(wchar_t* encryptBase);
+	errno_t GetEncryptBasePath(wchar_t* encryptBase);
 	errno_t GetKey(char* key);
 };

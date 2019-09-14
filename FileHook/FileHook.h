@@ -2,6 +2,7 @@
 #include "common.h"
 #include <detours.h>
 #include <detver.h>
+#undef _USING_V110_SDK71_
 #include <wchar.h>
 #include <unordered_map>
 #include <functional>
@@ -30,17 +31,18 @@ using READFILESCATTER = BOOL(WINAPI *)(HANDLE, FILE_SEGMENT_ELEMENT[], DWORD, LP
 using WRITEFILE = BOOL(WINAPI *)(HANDLE, LPCVOID, DWORD, LPDWORD, LPOVERLAPPED);
 using CREATEFILEW = HANDLE(WINAPI *)(LPCWSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE);
 using CLOSEHANDLE = BOOL(WINAPI *)(HANDLE);
+using SETFILEPOINTER = DWORD(WINAPI *)(HANDLE, LONG, PLONG, DWORD);
 
 class FileHook {
 private:
-	mutable std::shared_timed_mutex mutex_;
+	mutable std::shared_mutex mutex_;
 	std::unordered_map<HANDLE, std::shared_ptr<Encryptor>> encryptorMap_;
 	std::allocator<unsigned char> allocator;
-	wchar_t encryptBase[MAX_PATH];
+	wchar_t encryptBasePath[MAX_PATH];
 	unsigned char masterKey[crypto_stream_xchacha20_KEYBYTES];
 
-	std::shared_ptr<Encryptor> AddHandle(const HANDLE, const std::shared_ptr<Encryptor>);
-	void RemoveHandle(const HANDLE&);
+	std::shared_ptr<Encryptor> AddHandleEncryptor(const HANDLE, const std::shared_ptr<Encryptor>);
+	void RemoveHandleEncryptor(const HANDLE&);
 	std::shared_ptr<Encryptor> GetHandleEncryptor(const HANDLE&);
 
 public:
@@ -53,11 +55,10 @@ public:
 	WRITEFILE realWriteFile = nullptr;
 	CREATEFILEW realCreateFileW = nullptr;
 	CLOSEHANDLE realCloseHandle = nullptr;
+    SETFILEPOINTER realSetFilePointer = nullptr;
 
-	void hookRead();
-	void unhookRead();
-	void hookWrite();
-	void unhookWrite();
+	void Hook();
+	void Unhook();
 
 	BOOL WINAPI FakeReadFile(HANDLE, LPVOID, DWORD, LPDWORD, LPOVERLAPPED);
 	BOOL WINAPI FakeReadFileEx(HANDLE, LPVOID, DWORD, LPOVERLAPPED, LPOVERLAPPED_COMPLETION_ROUTINE);
@@ -65,4 +66,5 @@ public:
 	BOOL WINAPI FakeWriteFile(HANDLE, LPCVOID, DWORD, LPDWORD, LPOVERLAPPED);
 	HANDLE WINAPI FakeCreateFileW(LPCWSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE);
 	BOOL WINAPI FakeCloseHandle(HANDLE);
+    DWORD WINAPI FakeSetFilePointer(HANDLE, LONG, PLONG, DWORD);
 };
