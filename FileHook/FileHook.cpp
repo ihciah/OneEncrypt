@@ -165,21 +165,32 @@ BOOL WINAPI FileHook::FakeCloseHandle(HANDLE hObject) {
 }
 
 DWORD WINAPI FileHook::FakeSetFilePointer(HANDLE hFile, LONG lDistanceToMove, PLONG lpDistanceToMoveHigh, DWORD dwMoveMethod) {
+    int64_t movement = lDistanceToMove;
     if (lpDistanceToMoveHigh != nullptr) {
-        // TODO: support file pointer movement more than 4G
-        logger << "TODO unsupported yet\n";
-        return realSetFilePointer(hFile, lDistanceToMove, lpDistanceToMoveHigh, dwMoveMethod);
+        movement |= (*lpDistanceToMoveHigh << 32);
     }
 
     DWORD ret;
     switch (dwMoveMethod) {
     case FILE_BEGIN:
-        ret = realSetFilePointer(hFile, lDistanceToMove + NONCE_LEN, lpDistanceToMoveHigh, dwMoveMethod);
+        movement += NONCE_LEN;
+        LONG lDistanceToMoveHighAdjusted;
+        LONG lDistanceToMoveAdjusted;
+        PLONG lpDistanceToMoveHighAdjusted;
+        if (movement >= LONG_MIN && movement <= LONG_MAX) {
+            lpDistanceToMoveHighAdjusted = nullptr;
+            lDistanceToMoveAdjusted = (LONG)movement;
+        } else {
+            lpDistanceToMoveHighAdjusted = &lDistanceToMoveHighAdjusted;
+            lDistanceToMoveHighAdjusted = movement >> 32;
+            lDistanceToMoveAdjusted = movement & 0xFFFFFFFF;
+        }
+        ret = realSetFilePointer(hFile, lDistanceToMoveAdjusted, lpDistanceToMoveHighAdjusted, dwMoveMethod);
         if (ret == INVALID_SET_FILE_POINTER && GetLastError() != NOERROR) {
             // Early return: System call failed
             return ret;
         }
-        GetHandleEncryptor(hFile)->SetCursor(lDistanceToMove);
+        GetHandleEncryptor(hFile)->SetCursor(movement - NONCE_LEN);
         return ret;
     case FILE_CURRENT:
         ret = realSetFilePointer(hFile, lDistanceToMove, lpDistanceToMoveHigh, dwMoveMethod);
@@ -187,7 +198,7 @@ DWORD WINAPI FileHook::FakeSetFilePointer(HANDLE hFile, LONG lDistanceToMove, PL
             // Early return: System call failed
             return ret;
         }
-        GetHandleEncryptor(hFile)->MoveCursor(lDistanceToMove);
+        GetHandleEncryptor(hFile)->MoveCursor(movement);
         return ret;
     case FILE_END:
         // Move pointer to file begin first
@@ -204,7 +215,7 @@ DWORD WINAPI FileHook::FakeSetFilePointer(HANDLE hFile, LONG lDistanceToMove, PL
             return ret;
         }
         // Calculate cursor and set it
-        GetHandleEncryptor(hFile)->SetCursor(ret - fileBeginPointer + 12);
+        GetHandleEncryptor(hFile)->SetCursor(ret - fileBeginPointer + NONCE_LEN);
         return ret;
     }
     logger << "Unexpected error occurred.\n";

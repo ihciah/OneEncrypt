@@ -9,6 +9,7 @@
 #include <utility>
 #include <string>
 #include <shared_mutex>
+#include <limits>
 #include "Encryptor.h"
 #include "ConfigLoader.h"
 #include "Logger.h"
