@@ -185,7 +185,8 @@ DWORD WINAPI FileHook::FakeSetFilePointer(HANDLE hFile, LONG lDistanceToMove, PL
         if (movement >= LONG_MIN && movement <= LONG_MAX) {
             lpDistanceToMoveHighAdjusted = nullptr;
             lDistanceToMoveAdjusted = (LONG)movement;
-        } else {
+        }
+        else {
             lpDistanceToMoveHighAdjusted = &lDistanceToMoveHighAdjusted;
             lDistanceToMoveHighAdjusted = movement >> 32;
             lDistanceToMoveAdjusted = movement & 0xFFFFFFFF;
@@ -254,7 +255,7 @@ BOOL WINAPI FileHook::FakeSetFilePointerEx(HANDLE hFile, LARGE_INTEGER liDistanc
         return ret;
     case FILE_END:
         // Move pointer to file begin first
-        LARGE_INTEGER liZero, liHeadPtr, liCurrPtr;
+        LARGE_INTEGER liZero{}, liHeadPtr, liCurrPtr;
         auto succ = realSetFilePointerEx(hFile, liZero, &liHeadPtr, FILE_BEGIN);
         if (!succ) {
             // Early return: System call failed
