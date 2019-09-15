@@ -30,8 +30,9 @@ BOOL WINAPI FileHook::FakeReadFileScatter(HANDLE hFile, FILE_SEGMENT_ELEMENT aSe
 BOOL WINAPI FileHook::FakeWriteFile(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped)
 {
     auto enc = GetHandleEncryptor(hFile);
-    if (enc == nullptr)
+    if (enc == nullptr) {
         return realWriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped);
+    }
 
     logger << "[FileHook][WriteFile] Will decrypt\n";
     unsigned char *buffer = allocator.allocate(nNumberOfBytesToWrite);
@@ -165,6 +166,11 @@ BOOL WINAPI FileHook::FakeCloseHandle(HANDLE hObject) {
 }
 
 DWORD WINAPI FileHook::FakeSetFilePointer(HANDLE hFile, LONG lDistanceToMove, PLONG lpDistanceToMoveHigh, DWORD dwMoveMethod) {
+    auto enc = GetHandleEncryptor(hFile);
+    if (enc == nullptr) {
+        return realSetFilePointer(hFile, lDistanceToMove, lpDistanceToMoveHigh, dwMoveMethod);
+    }
+
     int64_t movement = lDistanceToMove;
     if (lpDistanceToMoveHigh != nullptr) {
         movement |= (*lpDistanceToMoveHigh << 32);
@@ -174,8 +180,7 @@ DWORD WINAPI FileHook::FakeSetFilePointer(HANDLE hFile, LONG lDistanceToMove, PL
     switch (dwMoveMethod) {
     case FILE_BEGIN:
         movement += NONCE_LEN;
-        LONG lDistanceToMoveHighAdjusted;
-        LONG lDistanceToMoveAdjusted;
+        LONG lDistanceToMoveHighAdjusted, lDistanceToMoveAdjusted;
         PLONG lpDistanceToMoveHighAdjusted;
         if (movement >= LONG_MIN && movement <= LONG_MAX) {
             lpDistanceToMoveHighAdjusted = nullptr;
@@ -186,7 +191,7 @@ DWORD WINAPI FileHook::FakeSetFilePointer(HANDLE hFile, LONG lDistanceToMove, PL
             lDistanceToMoveAdjusted = movement & 0xFFFFFFFF;
         }
         ret = realSetFilePointer(hFile, lDistanceToMoveAdjusted, lpDistanceToMoveHighAdjusted, dwMoveMethod);
-        if (ret == INVALID_SET_FILE_POINTER && GetLastError() != NOERROR) {
+        if (ret == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR) {
             // Early return: System call failed
             return ret;
         }
@@ -194,7 +199,7 @@ DWORD WINAPI FileHook::FakeSetFilePointer(HANDLE hFile, LONG lDistanceToMove, PL
         return ret;
     case FILE_CURRENT:
         ret = realSetFilePointer(hFile, lDistanceToMove, lpDistanceToMoveHigh, dwMoveMethod);
-        if (ret == INVALID_SET_FILE_POINTER && GetLastError() != NOERROR) {
+        if (ret == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR) {
             // Early return: System call failed
             return ret;
         }
@@ -203,14 +208,14 @@ DWORD WINAPI FileHook::FakeSetFilePointer(HANDLE hFile, LONG lDistanceToMove, PL
     case FILE_END:
         // Move pointer to file begin first
         auto fileBeginPointer = realSetFilePointer(hFile, 0, nullptr, FILE_BEGIN);
-        if (fileBeginPointer == INVALID_SET_FILE_POINTER && GetLastError() != NOERROR) {
+        if (fileBeginPointer == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR) {
             // Early return: System call failed
             return fileBeginPointer;
         }
 
-        // Then move pointer to file end
+        // Then move pointer to position relative to file end
         ret = realSetFilePointer(hFile, lDistanceToMove, lpDistanceToMoveHigh, dwMoveMethod);
-        if (ret == INVALID_SET_FILE_POINTER && GetLastError() != NOERROR) {
+        if (ret == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR) {
             // Early return: System call failed
             return ret;
         }
@@ -220,4 +225,95 @@ DWORD WINAPI FileHook::FakeSetFilePointer(HANDLE hFile, LONG lDistanceToMove, PL
     }
     logger << "Unexpected error occurred.\n";
     return INVALID_SET_FILE_POINTER;
+}
+
+BOOL WINAPI FileHook::FakeSetFilePointerEx(HANDLE hFile, LARGE_INTEGER liDistanceToMove, PLARGE_INTEGER lpNewFilePointer, DWORD dwMoveMethod) {
+    auto enc = GetHandleEncryptor(hFile);
+    if (enc == nullptr) {
+        return realSetFilePointerEx(hFile, liDistanceToMove, lpNewFilePointer, dwMoveMethod);
+    }
+
+    BOOL ret;
+    switch (dwMoveMethod) {
+    case FILE_BEGIN:
+        liDistanceToMove.QuadPart += NONCE_LEN;
+        ret = realSetFilePointerEx(hFile, liDistanceToMove, lpNewFilePointer, dwMoveMethod);
+        if (!ret) {
+            // Early return: System call failed
+            return ret;
+        }
+        GetHandleEncryptor(hFile)->SetCursor(liDistanceToMove.QuadPart - NONCE_LEN);
+        return ret;
+    case FILE_CURRENT:
+        ret = realSetFilePointerEx(hFile, liDistanceToMove, lpNewFilePointer, dwMoveMethod);
+        if (!ret) {
+            // Early return: System call failed
+            return ret;
+        }
+        GetHandleEncryptor(hFile)->MoveCursor(liDistanceToMove.QuadPart);
+        return ret;
+    case FILE_END:
+        // Move pointer to file begin first
+        LARGE_INTEGER liZero, liHeadPtr, liCurrPtr;
+        auto succ = realSetFilePointerEx(hFile, liZero, &liHeadPtr, FILE_BEGIN);
+        if (!succ) {
+            // Early return: System call failed
+            return succ;
+        }
+
+        // Then move pointer to position relative to file end
+        ret = realSetFilePointerEx(hFile, liDistanceToMove, &liCurrPtr, dwMoveMethod);
+        if (lpNewFilePointer != nullptr) {
+            lpNewFilePointer->QuadPart = liCurrPtr.QuadPart;
+            lpNewFilePointer->HighPart = liCurrPtr.HighPart;
+            lpNewFilePointer->LowPart = liCurrPtr.LowPart;
+        }
+        if (!ret) {
+            // Early return: System call failed
+            return ret;
+        }
+        // Calculate cursor and set it
+        GetHandleEncryptor(hFile)->SetCursor(liCurrPtr.QuadPart - liHeadPtr.QuadPart + NONCE_LEN);
+        return ret;
+    }
+    logger << "Unexpected error occurred.\n";
+    return false;
+}
+
+DWORD WINAPI FileHook::FakeGetFileSize(HANDLE hFile, LPDWORD lpFileSizeHigh) {
+    auto enc = GetHandleEncryptor(hFile);
+    if (enc == nullptr) {
+        return realGetFileSize(hFile, lpFileSizeHigh);
+    }
+
+    auto ret = realGetFileSize(hFile, lpFileSizeHigh);
+
+    // The API is called successfully
+    if (ret != INVALID_FILE_SIZE || GetLastError() == NO_ERROR) {
+        int64_t fileSize = ret;
+        if (lpFileSizeHigh != nullptr) {
+            fileSize |= (*lpFileSizeHigh << 32);
+        }
+        fileSize -= NONCE_LEN;
+        if (lpFileSizeHigh != nullptr) *lpFileSizeHigh = (fileSize >> 32);
+        ret = fileSize & 0xFFFFFFFF;
+    }
+    return ret;
+}
+
+BOOL WINAPI FileHook::FakeGetFileSizeEx(HANDLE hFile, PLARGE_INTEGER lpFileSize) {
+    auto enc = GetHandleEncryptor(hFile);
+    if (enc == nullptr) {
+        return realGetFileSizeEx(hFile, lpFileSize);
+    }
+
+    auto ret = realGetFileSizeEx(hFile, lpFileSize);
+
+    // The API is called successfully
+    if (ret) {
+        lpFileSize->QuadPart -= NONCE_LEN;
+        // lpFileSize->LowPart = (LONG)lpFileSize->QuadPart; // Maybe useless?
+        // lpFileSize->HighPart = (LONG)(lpFileSize->QuadPart >> 32); // Maybe useless?
+    }
+    return ret;
 }

@@ -5,10 +5,10 @@
 
 __declspec(dllimport) FileHook *fileHook;
 
-// Read configure file
+/*
+    Read configure file, load key and encryptBasePath
+*/
 FileHook::FileHook() {
-    DetourRestoreAfterWith();
-
     logger = std::make_unique<Logger>(L"log.txt");
     logger << "[FileHook Boot] " << "Start load config: " << CONFIG_FILE << "\n"; // DEBUG
 
@@ -19,19 +19,28 @@ FileHook::FileHook() {
     logger << "[FileHook Boot ConfigLoader] " << "EncrpytBasePath: " << encryptBasePath << "; key: " << key << "\n"; // DEBUG
 
     int ret = crypto_pwhash(masterKey, crypto_stream_xchacha20_KEYBYTES, key, strlen(key), ZEROSALT, OPSLIMIT, MEMLIMIT, ALG);
-    logger << "[FileHook Boot ConfigLoader] Calculate pwhash " << (ret == 0 ? "succeed" : "failed") << "\n"; // DEBUG
+    logger << "[FileHook Boot ConfigLoader] Calculate password hash " << (ret == 0 ? "succeed" : "failed") << "\n"; // DEBUG
 }
 
+/*
+    Add handle->shared_ptr<Encryptor> to hash map
+*/
 std::shared_ptr<Encryptor> FileHook::AddHandleEncryptor(const HANDLE h, const std::shared_ptr<Encryptor> e) {
     std::shared_lock lock(mutex_);
     encryptorMap_[h] = e;
 }
 
+/*
+    Remove handle->shared_ptr<Encryptor> from hash map if exists
+*/
 void FileHook::RemoveHandleEncryptor(const HANDLE& h) {
     std::unique_lock lock(mutex_);
     encryptorMap_.erase(h);
 }
 
+/*
+    Get shared_ptr<Encryptor> from hash map if exists, otherwise nullptr
+*/
 std::shared_ptr<Encryptor> FileHook::GetHandleEncryptor(const HANDLE& h) {
     std::shared_lock lock(mutex_);
     if (auto it = encryptorMap_.find(h); it != encryptorMap_.end()) {
@@ -65,6 +74,22 @@ BOOL WINAPI fakeCloseHandle(HANDLE hObject) {
     return fileHook->FakeCloseHandle(hObject);
 }
 
+BOOL WINAPI fakeSetFilePointer(HANDLE hFile, LONG lDistanceToMove, PLONG lpDistanceToMoveHigh, DWORD dwMoveMethod) {
+    return fileHook->FakeSetFilePointer(hFile, lDistanceToMove, lpDistanceToMoveHigh, dwMoveMethod);
+}
+
+BOOL WINAPI fakeSetFilePointerEx(HANDLE hFile, LARGE_INTEGER liDistanceToMove, PLARGE_INTEGER lpNewFilePointer, DWORD dwMoveMethod) {
+    return fileHook->FakeSetFilePointerEx(hFile, liDistanceToMove, lpNewFilePointer, dwMoveMethod);
+}
+
+DWORD WINAPI fakeGetFileSize(HANDLE hFile, LPDWORD lpFileSizeHigh) {
+    return fileHook->FakeGetFileSize(hFile, lpFileSizeHigh);
+}
+
+BOOL WINAPI fakeGetFileSizeEx(HANDLE hFile, PLARGE_INTEGER lpFileSize) {
+    return fileHook->FakeGetFileSizeEx(hFile, lpFileSize);
+}
+
 void FileHook::Hook() {
     DetourRestoreAfterWith();
     DetourTransactionBegin();
@@ -75,12 +100,20 @@ void FileHook::Hook() {
     realCreateFileW = (CREATEFILEW)DetourFindFunction("Kernel32.dll", "CreateFileW");
     realCloseHandle = (CLOSEHANDLE)DetourFindFunction("Kernel32.dll", "CloseHandle");
     realWriteFile = (WRITEFILE)DetourFindFunction("Kernel32.dll", "WriteFile");
+    realSetFilePointer = (SETFILEPOINTER)DetourFindFunction("Kernel32.dll", "SetFilePointer");
+    realSetFilePointerEx = (SETFILEPOINTEREX)DetourFindFunction("Kernel32.dll", "SetFilePointerEx");
+    realGetFileSize = (GETFILESIZE)DetourFindFunction("Kernel32.dll", "GetFileSize");
+    realGetFileSizeEx = (GETFILESIZEEX)DetourFindFunction("Kernel32.dll", "GetFileSizeEx");
     HookFunction(realReadFile, fakeReadFile);
     HookFunction(realReadFileEx, fakeReadFileEx);
     HookFunction(realReadFileScatter, fakeReadFileScatter);
     HookFunction(realCreateFileW, fakeCreateFileW);
     HookFunction(realCloseHandle, fakeCloseHandle);
     HookFunction(realWriteFile, fakeWriteFile);
+    HookFunction(realSetFilePointer, fakeSetFilePointer);
+    HookFunction(realSetFilePointerEx, fakeSetFilePointerEx);
+    HookFunction(realGetFileSize, fakeGetFileSize);
+    HookFunction(realGetFileSizeEx, fakeGetFileSizeEx);
     DetourTransactionCommit();
 
     logger << "[FileHook Boot] Hooked\n";
@@ -95,5 +128,9 @@ void FileHook::Unhook() {
     UnhookFunction(realCreateFileW, fakeCreateFileW);
     UnhookFunction(realCloseHandle, fakeCloseHandle);
     UnhookFunction(realWriteFile, fakeWriteFile);
+    UnhookFunction(realSetFilePointer, fakeSetFilePointer);
+    UnhookFunction(realSetFilePointerEx, fakeSetFilePointerEx);
+    UnhookFunction(realGetFileSize, fakeGetFileSize);
+    UnhookFunction(realGetFileSizeEx, fakeGetFileSizeEx);
     DetourTransactionCommit();
 }
