@@ -40,7 +40,7 @@ FileHook::FileHook() {
 /*
     Add handle->shared_ptr<Encryptor> to hash map
 */
-std::shared_ptr<Encryptor> FileHook::AddHandleEncryptor(const HANDLE h, const std::shared_ptr<Encryptor> e) {
+void FileHook::AddHandleEncryptor(const HANDLE h, const std::shared_ptr<Encryptor> e) {
     std::shared_lock lock(mutex_);
     encryptorMap_[h] = e;
 }

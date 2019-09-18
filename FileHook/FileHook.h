@@ -60,7 +60,7 @@ private:
     wchar_t encryptBasePath[MAX_PATH];
     unsigned char masterKey[crypto_stream_xchacha20_KEYBYTES];
 
-    std::shared_ptr<Encryptor> AddHandleEncryptor(const HANDLE, const std::shared_ptr<Encryptor>);
+    void AddHandleEncryptor(const HANDLE, const std::shared_ptr<Encryptor>);
     void RemoveHandleEncryptor(const HANDLE&);
     std::shared_ptr<Encryptor> GetHandleEncryptor(const HANDLE&);
 

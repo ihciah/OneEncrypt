@@ -1,5 +1,7 @@
 # OneEncrypt
 
+![Build Status](https://github.com/ihciah/OneEncrypt/workflows/Build/badge.svg)
+
 *Yet Another OneDrive Encryptor*
 
 利用 DLL 注入实现的无进程无感知 OneDrive 加密器
@@ -91,11 +93,10 @@ key 与文件分开放置可能会导致客户端尝试从服务端同步数据�
 
 ### 开发指南
 
-请自备 `Windows 10` 环境，安装 [Git](https://git-scm.com/download/win), [Visual Studio 2017/2019](https://visualstudio.microsoft.com/) (务必请勾选 `Platform ToolSet v141` )。
+请自备 `Windows 10` 环境，安装 [Git](https://git-scm.com/download/win), [Visual Studio 2019](https://visualstudio.microsoft.com/) (`Platform ToolSet v142`, `Windows10SDK 18362` )。
 
-使用 Visual Studio 打开项目，**若提示升级请点击不要升级**。因为有些项目配置并没有保存在配置中，请手动配置以下选项：
+因为有些项目配置并没有保存在配置中，请手动配置以下选项：
 
-- 将每个项目中的 `General -> Windows SDK Version` 修改为你系统中的版本（下拉会自动提示已有版本）。
 - 右键将 `Boot` 项目设置为启动项目。
 - 将 `Boot` 项目的 `C/C++ -> Working Directory` 修改为 `$(SolutionDir)x64\Release`。
 

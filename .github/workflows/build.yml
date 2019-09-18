@@ -1,0 +1,13 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: windows-2019
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Run build
+      run: .github\build.bat
